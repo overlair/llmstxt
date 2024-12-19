@@ -44,25 +44,36 @@ uv pip install -e ".[dev]"
 
 ## Usage
 
-```python
-# Basic usage
+```bash
+# Generate llms.txt from current directory
 python llms.py
-
-# The script will:
-# 1. Scan the current directory
-# 2. Process files according to .gitignore rules
-# 3. Generate llms.txt with compressed content
 ```
+
+The script will:
+
+1. Scan the current directory recursively
+2. Process files according to .gitignore rules
+3. Generate `llms.txt` with compressed content
 
 ## Output Format
 
 The generated `llms.txt` file follows this structure:
 
-``` python
-# Project metadata
-<file>path/to/file.py</file>
+```python
+# Project: llmstxt
+
+## Project Structure
+This file contains the compressed and processed contents of the project.
+
+### File Types
+- .py
+- .js
+- .java
+...
+
+<file>src/main.py</file>
 <metadata>
-path: path/to/file.py
+path: src/main.py
 type: py
 size: 1234 bytes
 </metadata>
@@ -77,13 +88,38 @@ def example():
     """Docstring preserved."""
     return True
 </code>
+
+<file>src/utils.js</file>
+<metadata>
+path: src/utils.js
+type: js
+size: 567 bytes
+</metadata>
+
+<code lang='javascript'>
+function helper() {
+  return true;
+}
+</code>
 ```
 
 ## Configuration
 
-- Maximum file size: 100KB (configurable)
-- Supported file extensions: .py, .js, .java, .c, .cpp, .h, .hpp, .sh, .txt, .md, .json, .xml, .yaml, .yml, .toml, .ini
-- Respects .gitignore rules
+The tool can be configured through function parameters:
+
+```python
+generate_llms_txt(
+    output_file="llms.txt",      # Output filename
+    max_file_size=100 * 1024,    # Max file size (100KB)
+    allowed_extensions=(         # Supported file types
+        ".py", ".js", ".java",
+        ".c", ".cpp", ".h", ".hpp",
+        ".sh", ".txt", ".md",
+        ".json", ".xml", ".yaml",
+        ".yml", ".toml", ".ini"
+    )
+)
+```
 
 ## Development
 
