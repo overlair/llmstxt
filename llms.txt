@@ -1,6 +1,47 @@
-## File: pyproject.toml
+# Project: llmstxt
 
-```
+## Project Structure
+This file contains the compressed and processed contents of the project.
+
+### File Types
+The following file types are included:
+- .py
+- .js
+- .html
+- .css
+- .java
+- .c
+- .cpp
+- .h
+- .hpp
+- .sh
+- .txt
+- .md
+- .json
+- .xml
+- .yaml
+- .yml
+- .toml
+- .ini
+
+### Special Files
+<file>README.md</file>
+<metadata>
+path: README.md
+size: 10 bytes
+</metadata>
+
+# llmstxt
+
+
+<file>pyproject.toml</file>
+<metadata>
+path: pyproject.toml
+type: toml
+size: 1602 bytes
+</metadata>
+
+<content type='toml'>
 [project]
 name = "llmstxt"
 version = "0.1.0"
@@ -8,29 +49,38 @@ description = "A tool to compress and process code files into a single text file
 requires-python = ">=3.8"
 dependencies = [
     "gitignore-parser",
+    "astroid",
 ]
+
 [project.optional-dependencies]
 dev = [
     "mypy",
     "ruff",
 ]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
 [tool.mypy]
 python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 check_untyped_defs = true
+strict = true
+
 [tool.ruff]
 line-length = 88
 target-version = "py38"
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "W", "C90"]
 ignore = []
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
@@ -55,23 +105,245 @@ exclude = [
     "node_modules",
     "venv",
 ]
+
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
 [tool.ruff.lint.mccabe]
 max-complexity = 15
+
 [tool.ruff.lint.isort]
 known-first-party = ["llmstxt"]
+
 [tool.ruff.lint.per-file-ignores]
 "llms.py" = ["C901"]
-```
 
-## File: llms.py
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
-Error processing llms.py: 'BinOp' object has no attribute 'left'
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
 
-## File: .vscode/settings.json
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
 
-```
+</content>
+
+<file>llms.py</file>
+<metadata>
+path: llms.py
+type: py
+size: 11104 bytes
+</metadata>
+
+<imports>
+import ast
+import pathlib
+import re
+from typing import Optional, Union, List, Any, Sequence, cast
+import astroid  # type: ignore
+from gitignore_parser import parse_gitignore  # type: ignore
+    """Removes multiple blank lines from text files."""
+    """Extracts code blocks from Markdown and compresses them."""
+        outfile.write("The following file types are included:\n")
+        # Include README and LICENSE with metadata
+                                              ["import ", "from ", "require", "include"])]
+</imports>
+
+<code lang='py'>
+import ast
+import pathlib
+import re
+from typing import Optional, Union, List, Any, Sequence, cast
+import astroid
+from gitignore_parser import parse_gitignore
+
+def compress_python_code(content: str) -> str:
+    """Compress Python code while preserving docstrings."""
+    try:
+        parsed_ast = ast.parse(content)
+    except SyntaxError:
+        return content
+
+    class RemoveCommentsAndDocstrings(ast.NodeTransformer):
+        
+        def visit_FunctionDef(self, node: ast.FunctionDef) -> Optional[ast.FunctionDef]:
+            if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
+                docstring = node.body[0]
+                node.body = [docstring] + [n for n in map(self.visit, node.body[1:]) if n is not None]
+                return node
+            node.body = [n for n in map(self.visit, node.body) if n is not None]
+            return node
+        
+        def visit_ClassDef(self, node: ast.ClassDef) -> Optional[ast.ClassDef]:
+            if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
+                docstring = node.body[0]
+                node.body = [docstring] + [n for n in map(self.visit, node.body[1:]) if n is not None]
+                return node
+            node.body = [n for n in map(self.visit, node.body) if n is not None]
+            return node
+        
+        def visit_Module(self, node: ast.Module) -> Optional[ast.Module]:
+            if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
+                docstring = node.body[0]
+                node.body = [docstring] + [n for n in map(self.visit, node.body[1:]) if n is not None]
+                return node
+            node.body = [n for n in map(self.visit, node.body) if n is not None]
+            return node
+        
+        def generic_visit(self, node: ast.AST) -> Optional[ast.AST]:
+            if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+                return None
+            return super().generic_visit(node)
+    
+    try:
+        transformer = RemoveCommentsAndDocstrings()
+        cleaned_ast = transformer.visit(parsed_ast)
+        ast.fix_missing_locations(cleaned_ast)
+        astroid_module = astroid.parse(ast.unparse(cleaned_ast))
+        compressed_code = astroid_module.as_string()
+        compressed_code = re.sub('\\n\\s*\\n\\s*\\n', '\n\n', compressed_code)
+        return compressed_code
+    except Exception as e:
+        print(f'Warning: Error compressing Python code: {e}')
+        return content
+
+def compress_code_content(content: str, file_extension: str) -> str:
+    """Compress code content based on the file extension."""
+    if file_extension in ('.py', '.pyi'):
+        return compress_python_code(content)
+    return basic_compress(content, file_extension)
+
+def basic_compress(content: str, file_extension: str) -> str:
+    """Basic compression: remove comments and multiple blank lines."""
+    lines = content.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        if file_extension in ('.py', '.sh'):
+            line = re.sub('#.*$', '', line)
+        elif file_extension in ('.js', '.java', '.c', '.cpp', '.h', '.hpp'):
+            line = re.sub('//.*$', '', line)
+        cleaned_lines.append(line)
+    content = '\n'.join(cleaned_lines)
+    return re.sub('\\n\\s*\\n\\s*\\n', '\n\n', content)
+
+def compress_text_content(content: str) -> str:
+    """Removes multiple blank lines from text files."""
+    return re.sub('\\n\\s*\\n\\s*\\n', '\n\n', content)
+
+def compress_markdown_content(content: str) -> str:
+    """Extracts code blocks from Markdown and compresses them."""
+    parts = re.split('(```\\w*\\n.*?\\n```)', content, flags=re.DOTALL)
+    compressed_parts = []
+    for part in parts:
+        if part.startswith('```'):
+            lang_match = re.match('```(\\w*)\\n', part)
+            lang = lang_match.group(1) if lang_match else ''
+            code = re.sub('```\\w*\\n(.*)\\n```', '\\1', part, flags=re.DOTALL)
+            if lang in ('python', 'py'):
+                code = compress_python_code(code)
+            else:
+                code = compress_text_content(code)
+            compressed_parts.append(f'```{lang}\n{code}\n```')
+        else:
+            compressed_parts.append(compress_text_content(part))
+    return ''.join(compressed_parts)
+
+def generate_llms_txt(output_file: str = 'llms.txt', allowed_extensions: Sequence[str] = ('.py', '.js', '.html', '.css', '.java', '.c', '.cpp', '.h', '.hpp', '.sh', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini'), max_file_size: int = 100 * 1024) -> None:
+    """
+    Generates a compressed llms.txt file optimized for LLM/AI consumption.
+
+    Args:
+        output_file: Name of the output file
+        allowed_extensions: Tuple of file extensions to process
+        max_file_size: Maximum file size in bytes to process
+    """
+    current_dir: pathlib.Path = pathlib.Path('.')
+    gitignore_path: pathlib.Path = current_dir / '.gitignore'
+    matches = parse_gitignore(gitignore_path) if gitignore_path.exists() else None
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        outfile.write('# Project: llmstxt\n\n')
+        outfile.write('## Project Structure\n')
+        outfile.write('This file contains the compressed and processed contents of the project.\n\n')
+        outfile.write('### File Types\n')
+        outfile.write('The following file types are included:\n')
+        outfile.write(''.join([f'- {ext}\n' for ext in allowed_extensions]))
+        outfile.write('\n### Special Files\n')
+        for special_file in ['README.md', 'LICENSE', 'LICENSE.txt']:
+            special_path: pathlib.Path = current_dir / special_file
+            if special_path.exists():
+                outfile.write(f'<file>{special_file}</file>\n')
+                outfile.write('<metadata>\n')
+                outfile.write(f'path: {special_file}\n')
+                outfile.write(f'size: {special_path.stat().st_size} bytes\n')
+                outfile.write('</metadata>\n\n')
+                with open(special_path, 'r', encoding='utf-8', errors='replace') as infile:
+                    special_content: str = infile.read()
+                    outfile.write(special_content + '\n\n')
+        for file in current_dir.rglob('*'):
+            if file.is_file() and file.suffix.lower() in allowed_extensions and not (matches and matches(str(file.relative_to(current_dir)))) and file.name not in ['README.md', 'LICENSE', 'LICENSE.txt', output_file]:
+                if file.stat().st_size > max_file_size:
+                    print(f'Skipping {file} as it exceeds the maximum file size.')
+                    continue
+                relative_path: pathlib.Path = file.relative_to(current_dir)
+                outfile.write(f'<file>{relative_path}</file>\n')
+                outfile.write('<metadata>\n')
+                outfile.write(f'path: {relative_path}\n')
+                outfile.write(f"type: {file.suffix.lstrip('.')}\n")
+                outfile.write(f'size: {file.stat().st_size} bytes\n')
+                outfile.write('</metadata>\n\n')
+                try:
+                    with open(file, 'r', encoding='utf-8', errors='replace') as infile:
+                        raw_content: str = infile.read()
+                        if file.suffix.lower() in ('.py', '.js', '.java'):
+                            outfile.write('<imports>\n')
+                            import_lines = [line for line in raw_content.split('\n') if any((imp in line.lower() for imp in ['import ', 'from ', 'require', 'include']))]
+                            if import_lines:
+                                outfile.write('\n'.join(import_lines) + '\n')
+                            outfile.write('</imports>\n\n')
+                        if file.suffix.lower() in ('.py', '.js', '.java', '.c', '.cpp', '.h', '.hpp', '.sh'):
+                            code_content: str = compress_code_content(raw_content, file.suffix.lower())
+                            language: str = file.suffix.lstrip('.')
+                            outfile.write(f"<code lang='{language}'>\n{code_content}\n</code>\n\n")
+                        elif file.suffix.lower() in ('.txt', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini'):
+                            text_content: str = compress_text_content(raw_content)
+                            outfile.write(f"<content type='{file.suffix.lstrip('.')}'>\n")
+                            outfile.write(f'{text_content}\n')
+                            outfile.write('</content>\n\n')
+                        elif file.suffix.lower() == '.md':
+                            md_content: str = compress_markdown_content(raw_content)
+                            outfile.write('<markdown>\n')
+                            outfile.write(f'{md_content}\n')
+                            outfile.write('</markdown>\n\n')
+                        else:
+                            outfile.write(f"<content type='{file.suffix.lstrip('.')}'>\n")
+                            outfile.write(f'{raw_content}\n')
+                            outfile.write('</content>\n\n')
+                except Exception as e:
+                    outfile.write(f'<error>Error processing {relative_path}: {e}</error>\n\n')
+if __name__ == '__main__':
+    output_filename: str = 'llms.txt'
+    generate_llms_txt(output_filename)
+    print(f'{output_filename} generated successfully in the current directory!')
+
+
+</code>
+
+<file>.vscode/settings.json</file>
+<metadata>
+path: .vscode/settings.json
+type: json
+size: 513 bytes
+</metadata>
+
+<content type='json'>
 {
   "cSpell.words": [
     "celerybeat",
@@ -108,9 +380,61 @@ Error processing llms.py: 'BinOp' object has no attribute 'left'
     "webassets"
   ]
 }
-```
 
-## File: .venv/bin/activate_this.py
+</content>
 
-Error processing .venv/bin/activate_this.py: 'BinOp' object has no attribute 'right'
+<file>.venv/bin/activate_this.py</file>
+<metadata>
+path: .venv/bin/activate_this.py
+type: py
+size: 2390 bytes
+</metadata>
+
+<imports>
+# included in all copies or substantial portions of the Software.
+import runpy
+from __future__ import annotations
+import os
+import site
+import sys
+    msg = "You must use import runpy; runpy.run_path(this_file)"
+    raise AssertionError(msg) from exc
+base = bin_dir[: -len("bin") - 1]  # strip away the bin part from the __file__, plus the path separator
+# add the virtual environments libraries to the host python import mechanism
+</imports>
+
+<code lang='py'>
+"""
+Activate virtualenv for current interpreter:
+
+import runpy
+runpy.run_path(this_file)
+
+This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.
+"""
+
+from __future__ import annotations
+import os
+import site
+import sys
+try:
+    abs_file = os.path.abspath(__file__)
+except NameError as exc:
+    msg = 'You must use import runpy; runpy.run_path(this_file)'
+    raise AssertionError(msg) from exc
+bin_dir = os.path.dirname(abs_file)
+base = bin_dir[:-len('bin') - 1]
+os.environ['PATH'] = os.pathsep.join([bin_dir, *os.environ.get('PATH', '').split(os.pathsep)])
+os.environ['VIRTUAL_ENV'] = base
+os.environ['VIRTUAL_ENV_PROMPT'] = 'llmstxt' or os.path.basename(base)
+prev_length = len(sys.path)
+for lib in '../lib/python3.12/site-packages'.split(os.pathsep):
+    path = os.path.realpath(os.path.join(bin_dir, lib))
+    site.addsitedir(path)
+sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]
+sys.real_prefix = sys.prefix
+sys.prefix = base
+
+
+</code>
 
