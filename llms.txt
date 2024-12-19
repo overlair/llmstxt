@@ -28,7 +28,7 @@ The following file types are included:
 <file>README.md</file>
 <metadata>
 path: README.md
-size: 5567 bytes
+size: 5681 bytes
 </metadata>
 
 [![CodeQL Advanced](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml/badge.svg)](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml)
@@ -106,6 +106,14 @@ The script will:
 1. Scan the current directory recursively
 2. Process files according to .gitignore rules
 3. Generate `llms.txt` with compressed content
+
+### Install Locally
+
+```bash
+pip install --user .
+```
+
+Now you can use the `llmstxt` command from your terminal.
 
 ### GitHub Actions Integration
 
@@ -315,7 +323,7 @@ SOFTWARE.
 <metadata>
 path: pyproject.toml
 type: toml
-size: 659 bytes
+size: 725 bytes
 </metadata>
 
 <content type='toml'>
@@ -328,6 +336,9 @@ dependencies = ["gitignore_parser>=0.1.11", "astroid>=3.0.1"]
 requires-python = ">=3.8"
 readme = "README.md"
 license = { text = "MIT" }
+
+[project.scripts]
+llmstxt = "llmstxt.__main__:generate_llms_txt"
 
 [project.optional-dependencies]
 dev = ["mypy>=1.7.0", "ruff>=0.1.8"]
@@ -390,7 +401,7 @@ __all__ = ['generate_llms_txt']
 <metadata>
 path: llmstxt/__main__.py
 type: py
-size: 131 bytes
+size: 154 bytes
 </metadata>
 
 <imports>
