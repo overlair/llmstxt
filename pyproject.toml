@@ -1,18 +1,15 @@
 [project]
 name = "llmstxt"
 version = "0.1.0"
-description = "A tool to compress and process code files into a single text file"
+description = "Compress code files into LLM-friendly format"
+authors = [{ name = "Aunova", email = "chris@aunova.net" }]
+dependencies = ["gitignore_parser>=0.1.11", "astroid>=3.0.1"]
 requires-python = ">=3.8"
-dependencies = [
-    "gitignore-parser",
-    "astroid",
-]
+readme = "README.md"
+license = { text = "MIT" }
 
 [project.optional-dependencies]
-dev = [
-    "mypy",
-    "ruff",
-]
+dev = ["mypy>=1.7.0", "ruff>=0.1.8"]
 
 [build-system]
 requires = ["hatchling"]
