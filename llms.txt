@@ -28,10 +28,185 @@ The following file types are included:
 <file>README.md</file>
 <metadata>
 path: README.md
-size: 10 bytes
+size: 2993 bytes
 </metadata>
 
+[![CodeQL Advanced](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml/badge.svg)](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml)
+
 # llmstxt
+
+A Python tool for compressing and organizing code files into a single, LLM-friendly text file. This tool is designed to help prepare codebases for analysis by Large Language Models by removing unnecessary content while preserving important semantic information.
+
+## Features
+
+- **Smart Code Compression**
+  - Preserves docstrings and important comments
+  - Removes redundant whitespace and formatting
+  - Maintains code structure and readability
+  - Handles multiple programming languages
+
+- **Language Support**
+  - Python (with AST-based compression)
+  - JavaScript
+  - Java
+  - C/C++
+  - Shell scripts
+  - HTML/CSS
+  - Configuration files (JSON, YAML, TOML, INI)
+  - Markdown
+
+- **LLM-Friendly Output**
+  - XML-style semantic markers
+  - File metadata and type information
+  - Organized imports section
+  - Clear file boundaries
+  - Consistent formatting
+
+## Installation
+
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management.
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install the package and its dependencies
+uv pip install .
+
+# For development
+uv pip install -e ".[dev]"
+```
+
+## Usage
+
+```bash
+# Generate llms.txt from current directory
+python llms.py
+```
+
+The script will:
+
+1. Scan the current directory recursively
+2. Process files according to .gitignore rules
+3. Generate `llms.txt` with compressed content
+
+## Output Format
+
+The generated `llms.txt` file follows this structure:
+
+```python
+# Project: llmstxt
+
+## Project Structure
+This file contains the compressed and processed contents of the project.
+
+### File Types
+- .py
+- .js
+- .java
+...
+
+<file>src/main.py</file>
+<metadata>
+path: src/main.py
+type: py
+size: 1234 bytes
+</metadata>
+
+<imports>
+import ast
+from typing import Optional
+</imports>
+
+<code lang='python'>
+def example():
+    """Docstring preserved."""
+    return True
+</code>
+
+<file>src/utils.js</file>
+<metadata>
+path: src/utils.js
+type: js
+size: 567 bytes
+</metadata>
+
+<code lang='javascript'>
+function helper() {
+  return true;
+}
+</code>
+```
+
+## Configuration
+
+The tool can be configured through function parameters:
+
+```python
+generate_llms_txt(
+    output_file="llms.txt",      # Output filename
+    max_file_size=100 * 1024,    # Max file size (100KB)
+    allowed_extensions=(         # Supported file types
+        ".py", ".js", ".java",
+        ".c", ".cpp", ".h", ".hpp",
+        ".sh", ".txt", ".md",
+        ".json", ".xml", ".yaml",
+        ".yml", ".toml", ".ini"
+    )
+)
+```
+
+## Development
+
+Requirements:
+
+- Python 3.8+
+- [uv](https://github.com/astral-sh/uv) for dependency management
+
+```bash
+# Install dev dependencies
+uv pip install -e ".[dev]"
+
+# Run type checking
+mypy llms.py
+
+# Run linting and formatting
+ruff check .
+ruff format .
+```
+
+## License
+
+MIT License - See LICENSE file for details
+
+
+<file>LICENSE</file>
+<metadata>
+path: LICENSE
+size: 1063 bytes
+</metadata>
+
+MIT License
+
+Copyright (c) 2024 ngmisl
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 
 <file>pyproject.toml</file>
@@ -136,32 +311,52 @@ line_length = 88
 
 </content>
 
+<file>renovate.json</file>
+<metadata>
+path: renovate.json
+type: json
+size: 114 bytes
+</metadata>
+
+<content type='json'>
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ]
+}
+
+</content>
+
 <file>llms.py</file>
 <metadata>
 path: llms.py
 type: py
-size: 11104 bytes
+size: 12329 bytes
 </metadata>
 
 <imports>
 import ast
 import pathlib
 import re
-from typing import Optional, Union, List, Any, Sequence, cast
+from typing import Optional, Sequence, cast
 import astroid  # type: ignore
 from gitignore_parser import parse_gitignore  # type: ignore
     """Removes multiple blank lines from text files."""
     """Extracts code blocks from Markdown and compresses them."""
         outfile.write("The following file types are included:\n")
         # Include README and LICENSE with metadata
-                                              ["import ", "from ", "require", "include"])]
+                                        "import ",
+                                        "from ",
+                                        "require",
+                                        "include",
 </imports>
 
 <code lang='py'>
 import ast
 import pathlib
 import re
-from typing import Optional, Union, List, Any, Sequence, cast
+from typing import Optional, Sequence, cast
 import astroid
 from gitignore_parser import parse_gitignore
 
@@ -173,7 +368,7 @@ def compress_python_code(content: str) -> str:
         return content
 
     class RemoveCommentsAndDocstrings(ast.NodeTransformer):
-        
+
         def visit_FunctionDef(self, node: ast.FunctionDef) -> Optional[ast.FunctionDef]:
             if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
                 docstring = node.body[0]
@@ -181,7 +376,7 @@ def compress_python_code(content: str) -> str:
                 return node
             node.body = [n for n in map(self.visit, node.body) if n is not None]
             return node
-        
+
         def visit_ClassDef(self, node: ast.ClassDef) -> Optional[ast.ClassDef]:
             if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
                 docstring = node.body[0]
@@ -189,7 +384,7 @@ def compress_python_code(content: str) -> str:
                 return node
             node.body = [n for n in map(self.visit, node.body) if n is not None]
             return node
-        
+
         def visit_Module(self, node: ast.Module) -> Optional[ast.Module]:
             if ast.get_docstring(node) is not None and node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
                 docstring = node.body[0]
@@ -197,18 +392,25 @@ def compress_python_code(content: str) -> str:
                 return node
             node.body = [n for n in map(self.visit, node.body) if n is not None]
             return node
-        
-        def generic_visit(self, node: ast.AST) -> Optional[ast.AST]:
+
+        def generic_visit(self, node: ast.AST) -> ast.AST:
             if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
-                return None
+                return ast.Pass()
             return super().generic_visit(node)
-    
     try:
         transformer = RemoveCommentsAndDocstrings()
         cleaned_ast = transformer.visit(parsed_ast)
         ast.fix_missing_locations(cleaned_ast)
-        astroid_module = astroid.parse(ast.unparse(cleaned_ast))
-        compressed_code = astroid_module.as_string()
+        try:
+            source = ast.unparse(cleaned_ast)
+        except (AttributeError, TypeError):
+            source = cast(str, astroid.parse(ast.dump(cleaned_ast)).as_string())
+        lines = source.split('\n')
+        cleaned_lines = []
+        for line in lines:
+            if line.strip() != 'pass':
+                cleaned_lines.append(line)
+        compressed_code = '\n'.join(cleaned_lines)
         compressed_code = re.sub('\\n\\s*\\n\\s*\\n', '\n\n', compressed_code)
         return compressed_code
     except Exception as e:
@@ -256,7 +458,7 @@ def compress_markdown_content(content: str) -> str:
             compressed_parts.append(compress_text_content(part))
     return ''.join(compressed_parts)
 
-def generate_llms_txt(output_file: str = 'llms.txt', allowed_extensions: Sequence[str] = ('.py', '.js', '.html', '.css', '.java', '.c', '.cpp', '.h', '.hpp', '.sh', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini'), max_file_size: int = 100 * 1024) -> None:
+def generate_llms_txt(output_file: str='llms.txt', allowed_extensions: Sequence[str]=('.py', '.js', '.html', '.css', '.java', '.c', '.cpp', '.h', '.hpp', '.sh', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini'), max_file_size: int=100 * 1024) -> None:
     """
     Generates a compressed llms.txt file optimized for LLM/AI consumption.
 
@@ -288,7 +490,7 @@ def generate_llms_txt(output_file: str = 'llms.txt', allowed_extensions: Sequenc
                     special_content: str = infile.read()
                     outfile.write(special_content + '\n\n')
         for file in current_dir.rglob('*'):
-            if file.is_file() and file.suffix.lower() in allowed_extensions and not (matches and matches(str(file.relative_to(current_dir)))) and file.name not in ['README.md', 'LICENSE', 'LICENSE.txt', output_file]:
+            if file.is_file() and file.suffix.lower() in allowed_extensions and (not (matches and matches(str(file.relative_to(current_dir))))) and (file.name not in ['README.md', 'LICENSE', 'LICENSE.txt', output_file]):
                 if file.stat().st_size > max_file_size:
                     print(f'Skipping {file} as it exceeds the maximum file size.')
                     continue
@@ -296,7 +498,7 @@ def generate_llms_txt(output_file: str = 'llms.txt', allowed_extensions: Sequenc
                 outfile.write(f'<file>{relative_path}</file>\n')
                 outfile.write('<metadata>\n')
                 outfile.write(f'path: {relative_path}\n')
-                outfile.write(f"type: {file.suffix.lstrip('.')}\n")
+                outfile.write(f'type: {file.suffix.lstrip('.')}\n')
                 outfile.write(f'size: {file.stat().st_size} bytes\n')
                 outfile.write('</metadata>\n\n')
                 try:
@@ -332,8 +534,6 @@ if __name__ == '__main__':
     output_filename: str = 'llms.txt'
     generate_llms_txt(output_filename)
     print(f'{output_filename} generated successfully in the current directory!')
-
-
 </code>
 
 <file>.vscode/settings.json</file>
@@ -412,7 +612,6 @@ runpy.run_path(this_file)
 
 This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.
 """
-
 from __future__ import annotations
 import os
 import site
@@ -434,7 +633,108 @@ for lib in '../lib/python3.12/site-packages'.split(os.pathsep):
 sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]
 sys.real_prefix = sys.prefix
 sys.prefix = base
-
-
 </code>
+
+<file>.github/workflows/codeql.yml</file>
+<metadata>
+path: .github/workflows/codeql.yml
+type: yml
+size: 4301 bytes
+</metadata>
+
+<content type='yml'>
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '26 7 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners (GitHub.com only)
+    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: python
+          build-mode: none
+        # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
+        # Use `c-cpp` to analyze code written in C, C++ or both
+        # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
+        # Use 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
+        # To learn more about changing the languages that are analyzed or customizing the build mode for your analysis,
+        # see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning.
+        # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
+        # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    # If the analyze step fails for one of the languages you are analyzing with
+    # "We were unable to automatically build your code", modify the matrix above
+    # to set the build mode to "manual" for that language. Then modify this step
+    # to build your code.
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+    - if: matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        echo 'If you are using a "manual" build mode for one or more of the' \
+          'languages you are analyzing, replace this with the commands to build' \
+          'your code, for example:'
+        echo '  make bootstrap'
+        echo '  make release'
+        exit 1
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+</content>
 

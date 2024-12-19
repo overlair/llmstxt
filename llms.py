@@ -69,10 +69,25 @@ def compress_python_code(content: str) -> str:
         transformer = RemoveCommentsAndDocstrings()
         cleaned_ast = transformer.visit(parsed_ast)
         ast.fix_missing_locations(cleaned_ast)
-        # Use astroid to handle AST to source code conversion
-        astroid_module = astroid.parse(ast.dump(cleaned_ast))
-        compressed_code = cast(str, astroid_module.as_string())
-        # Remove multiple blank lines
+
+        # Convert AST to source code using astroid
+        try:
+            # Try using ast.unparse first (Python 3.9+)
+            source = ast.unparse(cleaned_ast)  # type: ignore
+        except (AttributeError, TypeError):
+            # Fallback to astroid for older Python versions
+            source = cast(str, astroid.parse(ast.dump(cleaned_ast)).as_string())
+
+        # Clean up the source code
+        lines = source.split("\n")
+        cleaned_lines = []
+        for line in lines:
+            # Remove empty pass statements
+            if line.strip() != "pass":
+                cleaned_lines.append(line)
+        
+        # Join lines and remove multiple blank lines
+        compressed_code = "\n".join(cleaned_lines)
         compressed_code = re.sub(r"\n\s*\n\s*\n", "\n\n", compressed_code)
         return compressed_code
     except Exception as e:
