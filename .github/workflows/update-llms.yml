@@ -1,0 +1,57 @@
+name: Update llms.txt
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-llms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv pip install .
+
+      - name: Generate llms.txt
+        run: python llms.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet llms.txt; then
+            echo "No changes to llms.txt"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected in llms.txt"
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push if changed
+        if: steps.changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add llms.txt
+          git commit -m "chore: update llms.txt [skip ci]"
+          git push

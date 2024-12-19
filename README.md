@@ -1,4 +1,5 @@
 [![CodeQL Advanced](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml/badge.svg)](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml)
+[![Update llms.txt](https://github.com/ngmisl/llmstxt/actions/workflows/update-llms.yml/badge.svg)](https://github.com/ngmisl/llmstxt/actions/workflows/update-llms.yml)
 
 # llmstxt
 
@@ -46,16 +47,40 @@ uv pip install -e ".[dev]"
 
 ## Usage
 
+### Local Usage
+
 ```bash
 # Generate llms.txt from current directory
 python llms.py
 ```
 
 The script will:
-
 1. Scan the current directory recursively
 2. Process files according to .gitignore rules
 3. Generate `llms.txt` with compressed content
+
+### GitHub Actions Integration
+
+This tool can automatically generate and update `llms.txt` in your repository using GitHub Actions. To set it up:
+
+1. Copy the workflow file:
+   ```bash
+   mkdir -p .github/workflows
+   curl -o .github/workflows/update-llms.yml https://raw.githubusercontent.com/ngmisl/llmstxt/main/.github/workflows/update-llms.yml
+   ```
+
+2. Commit and push the workflow file:
+   ```bash
+   git add .github/workflows/update-llms.yml
+   git commit -m "chore: add llmstxt workflow"
+   git push
+   ```
+
+The workflow will:
+- Run automatically on pushes to main/master
+- Generate/update llms.txt
+- Commit and push changes if needed
+- Can be manually triggered from the Actions tab
 
 ## Output Format
 
