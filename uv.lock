@@ -59,10 +59,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "astroid" },
-    { name = "gitignore-parser" },
-    { name = "mypy", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "astroid", specifier = ">=3.0.1" },
+    { name = "gitignore-parser", specifier = ">=0.1.11" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.7.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.8" },
 ]
 
 [[package]]

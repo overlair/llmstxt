@@ -3,181 +3,118 @@
 
 # llmstxt
 
-A Python tool for compressing and organizing code files into a single, LLM-friendly text file. This tool is designed to help prepare codebases for analysis by Large Language Models by removing unnecessary content while preserving important semantic information.
+A Python tool to compress code files into a single, LLM-friendly text file.
 
 ## Features
 
-- **Smart Code Compression**
-  - Preserves docstrings and important comments
-  - Removes redundant whitespace and formatting
-  - Maintains code structure and readability
-  - Handles multiple programming languages
-
-- **Language Support**
-  - Python (with AST-based compression)
-  - JavaScript
-  - Java
-  - C/C++
-  - Shell scripts
-  - HTML/CSS
-  - Configuration files (JSON, YAML, TOML, INI)
-  - Markdown
-
-- **LLM-Friendly Output**
-  - XML-style semantic markers
-  - File metadata and type information
-  - Organized imports section
-  - Clear file boundaries
-  - Consistent formatting
+- Preserves important comments and docstrings
+- Removes unnecessary content
+- Structured, LLM-friendly output
+- GitHub Actions integration for automatic updates
 
 ## Installation
 
-This project uses [uv](https://github.com/astral-sh/uv) for dependency management.
-
 ```bash
-# Install uv if you haven't already
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install the package and its dependencies
-uv pip install .
-
-# For development
-uv pip install -e ".[dev]"
+pip install git+https://github.com/ngmisl/llmstxt.git
 ```
 
 ## Usage
 
-### Local Usage
+### Command Line
 
 ```bash
-# Generate llms.txt from current directory
-python llms.py
-```
+# Generate llms.txt in current directory
+python -m llmstxt
 
-The script will:
-1. Scan the current directory recursively
-2. Process files according to .gitignore rules
-3. Generate `llms.txt` with compressed content
+# Or import and use in your code
+from llmstxt import generate_llms_txt
+generate_llms_txt()
+```
 
 ### GitHub Actions Integration
 
-There are two ways to use this tool with GitHub Actions:
+To automatically update `llms.txt` in your repository:
 
-1. **For Your Own Repository**
-   ```bash
-   # Create a workflow file
-   mkdir -p .github/workflows
-   curl -o .github/workflows/update-llms.yml https://raw.githubusercontent.com/ngmisl/llmstxt/main/.github/workflows/update-llms.yml
-   ```
+1. Create `.github/workflows/update-llms.yml` with:
 
-   The workflow will:
-   - Run automatically on pushes to main/master
-   - Create a PR with updated llms.txt when changes are detected
-   - Can be manually triggered from the Actions tab
+```yaml
+name: Update llms.txt
 
-2. **For Remote Repositories**
-   You can trigger the action for any repository using the GitHub API:
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch: # Allow manual triggering
 
-   ```bash
-   curl -X POST \
-     -H "Authorization: token $GITHUB_TOKEN" \
-     -H "Accept: application/vnd.github.v3+json" \
-     https://api.github.com/repos/ngmisl/llmstxt/dispatches \
-     -d '{"event_type": "update-llms", "client_payload": {"repository": "https://github.com/user/repo.git"}}'
-   ```
+permissions:
+  contents: write
 
-   This will:
-   - Clone the target repository
-   - Generate llms.txt
-   - Create a PR with the changes
+jobs:
+  update-llms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-The workflow uses GitHub's PR system to ensure changes are reviewed before being merged.
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: "pip"
 
-## Output Format
+      - name: Install llmstxt tool
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install git+https://github.com/ngmisl/llmstxt.git
 
-The generated `llms.txt` file follows this structure:
+      - name: Generate llms.txt
+        run: |
+          . .venv/bin/activate
+          rm -f llms.txt
+          python -c "from llmstxt import generate_llms_txt; generate_llms_txt()"
 
-```python
-# Project: llmstxt
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
 
-## Project Structure
-This file contains the compressed and processed contents of the project.
-
-### File Types
-- .py
-- .js
-- .java
-...
-
-<file>src/main.py</file>
-<metadata>
-path: src/main.py
-type: py
-size: 1234 bytes
-</metadata>
-
-<imports>
-import ast
-from typing import Optional
-</imports>
-
-<code lang='python'>
-def example():
-    """Docstring preserved."""
-    return True
-</code>
-
-<file>src/utils.js</file>
-<metadata>
-path: src/utils.js
-type: js
-size: 567 bytes
-</metadata>
-
-<code lang='javascript'>
-function helper() {
-  return true;
-}
-</code>
+      - name: Commit and push changes
+        run: |
+          git add llms.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update llms.txt"
+            git push
+          fi
 ```
 
-## Configuration
-
-The tool can be configured through function parameters:
-
-```python
-generate_llms_txt(
-    output_file="llms.txt",      # Output filename
-    max_file_size=100 * 1024,    # Max file size (100KB)
-    allowed_extensions=(         # Supported file types
-        ".py", ".js", ".java",
-        ".c", ".cpp", ".h", ".hpp",
-        ".sh", ".txt", ".md",
-        ".json", ".xml", ".yaml",
-        ".yml", ".toml", ".ini"
-    )
-)
-```
+The workflow will:
+- Run on push to main/master
+- Run on pull requests
+- Can be triggered manually
+- Generate and commit `llms.txt` automatically
 
 ## Development
 
-Requirements:
-
-- Python 3.8+
-- [uv](https://github.com/astral-sh/uv) for dependency management
-
 ```bash
-# Install dev dependencies
-uv pip install -e ".[dev]"
+# Clone the repository
+git clone https://github.com/ngmisl/llmstxt.git
+cd llmstxt
+
+# Install development dependencies
+pip install -e ".[dev]"
 
 # Run type checking
-mypy llms.py
+mypy llmstxt
 
-# Run linting and formatting
-ruff check .
-ruff format .
+# Run linting
+ruff check llmstxt
 ```
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT
