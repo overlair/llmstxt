@@ -29,12 +29,17 @@ A Python tool for compressing and organizing code files into a single, LLM-frien
 
 ## Installation
 
-```bash
-# Using pip
-pip install -r requirements.txt
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management.
 
-# Using uv (recommended)
-uv pip install -r requirements.txt
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install the package and its dependencies
+uv pip install .
+
+# For development
+uv pip install -e ".[dev]"
 ```
 
 ## Usage
@@ -53,7 +58,7 @@ python llms.py
 
 The generated `llms.txt` file follows this structure:
 
-```
+``` python
 # Project metadata
 <file>path/to/file.py</file>
 <metadata>
@@ -83,9 +88,9 @@ def example():
 ## Development
 
 Requirements:
+
 - Python 3.8+
-- mypy for type checking
-- ruff for linting
+- [uv](https://github.com/astral-sh/uv) for dependency management
 
 ```bash
 # Install dev dependencies
@@ -94,8 +99,9 @@ uv pip install -e ".[dev]"
 # Run type checking
 mypy llms.py
 
-# Run linting
+# Run linting and formatting
 ruff check .
+ruff format .
 ```
 
 ## License
