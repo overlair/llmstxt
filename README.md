@@ -61,26 +61,37 @@ The script will:
 
 ### GitHub Actions Integration
 
-This tool can automatically generate and update `llms.txt` in your repository using GitHub Actions. To set it up:
+There are two ways to use this tool with GitHub Actions:
 
-1. Copy the workflow file:
+1. **For Your Own Repository**
    ```bash
+   # Create a workflow file
    mkdir -p .github/workflows
    curl -o .github/workflows/update-llms.yml https://raw.githubusercontent.com/ngmisl/llmstxt/main/.github/workflows/update-llms.yml
    ```
 
-2. Commit and push the workflow file:
+   The workflow will:
+   - Run automatically on pushes to main/master
+   - Create a PR with updated llms.txt when changes are detected
+   - Can be manually triggered from the Actions tab
+
+2. **For Remote Repositories**
+   You can trigger the action for any repository using the GitHub API:
+
    ```bash
-   git add .github/workflows/update-llms.yml
-   git commit -m "chore: add llmstxt workflow"
-   git push
+   curl -X POST \
+     -H "Authorization: token $GITHUB_TOKEN" \
+     -H "Accept: application/vnd.github.v3+json" \
+     https://api.github.com/repos/ngmisl/llmstxt/dispatches \
+     -d '{"event_type": "update-llms", "client_payload": {"repository": "https://github.com/user/repo.git"}}'
    ```
 
-The workflow will:
-- Run automatically on pushes to main/master
-- Generate/update llms.txt
-- Commit and push changes if needed
-- Can be manually triggered from the Actions tab
+   This will:
+   - Clone the target repository
+   - Generate llms.txt
+   - Create a PR with the changes
+
+The workflow uses GitHub's PR system to ensure changes are reviewed before being merged.
 
 ## Output Format
 
