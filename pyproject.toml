@@ -8,6 +8,9 @@ requires-python = ">=3.8"
 readme = "README.md"
 license = { text = "MIT" }
 
+[project.scripts]
+llmstxt = "llmstxt.__main__:generate_llms_txt"
+
 [project.optional-dependencies]
 dev = ["mypy>=1.7.0", "ruff>=0.1.8"]
 

@@ -74,6 +74,14 @@ The script will:
 2. Process files according to .gitignore rules
 3. Generate `llms.txt` with compressed content
 
+### Install Locally
+
+```bash
+pip install --user .
+```
+
+Now you can use the `llmstxt` command from your terminal.
+
 ### GitHub Actions Integration
 
 There are two ways to use this tool with GitHub Actions:
