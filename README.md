@@ -1,3 +1,5 @@
+[![CodeQL Advanced](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml/badge.svg)](https://github.com/ngmisl/llmstxt/actions/workflows/codeql.yml)
+
 # llmstxt
 
 A Python tool for compressing and organizing code files into a single, LLM-friendly text file. This tool is designed to help prepare codebases for analysis by Large Language Models by removing unnecessary content while preserving important semantic information.
