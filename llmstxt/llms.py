@@ -162,6 +162,10 @@ def generate_llms_txt(
         ".yml",
         ".toml",
         ".ini",
+        # additional Apple-specific files
+        ".swift",
+        ".mm",
+        ".m"
     ),
     max_file_size: int = 100 * 1024,  # 100 KB
 ) -> None:
